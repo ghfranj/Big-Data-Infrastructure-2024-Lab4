@@ -2,7 +2,7 @@ import unittest
 from src import process_data
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-class MyTestCase(unittest.TestCase):
+class TestProcessData(unittest.TestCase):
     def test_clean_text(self):
         result = process_data.clean_text('Hello, how are you?')
         self.assertEqual(result, "hello how are you")
@@ -30,5 +30,4 @@ class MyTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # MyTestCase.test_clean_text()
     unittest.main()

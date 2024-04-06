@@ -7,7 +7,6 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
 import torch
 
-
 def load_data(file_path):
     data = pd.read_csv(file_path, encoding='latin1')[:30000]
     data = data.dropna()
@@ -16,11 +15,14 @@ def load_data(file_path):
 
 def clean_text(text):
     cleaned_text = ''.join([char.lower() for char in text if char.isalnum() or char.isspace()])
+    import nltk
+    nltk.download('punkt')
     tokens = nltk.word_tokenize(cleaned_text)
     return ' '.join(tokens)
 
 
 def remove_stopwords(text):
+    nltk.download('stopwords')
     stop_words = set(stopwords.words('english'))
     return ' '.join([word for word in text.split() if word not in stop_words])
 
@@ -81,7 +83,7 @@ class TwitterDataset(Dataset):
         }
 
 
-def get_train_test(x_train_path, y_train_path, x_test_path, y_test_path):
+def get_train_test_data(x_train_path, y_train_path, x_test_path, y_test_path):
     inputs = list(pd.read_csv(x_train_path)['cleaned_text']) + list(pd.read_csv(x_test_path)['cleaned_text'])
     outputs = list(pd.read_csv(y_train_path)['Sentiment']) + list(pd.read_csv(y_test_path)['Sentiment'])
     inputs = pd.DataFrame(data=inputs, columns=['cleaned_text'])
@@ -101,7 +103,7 @@ def get_train_test(x_train_path, y_train_path, x_test_path, y_test_path):
 def build_loaders(batch_size=64):
     config = configparser.ConfigParser()
     config.read("config.ini")
-    x_train, y_train, x_test, y_test = get_train_test(config['SPLIT_DATA']['x_train'], config['SPLIT_DATA']['y_train'],\
+    x_train, y_train, x_test, y_test = get_train_test_data(config['SPLIT_DATA']['x_train'], config['SPLIT_DATA']['y_train'],\
                                                       config['SPLIT_DATA']['x_test'], config['SPLIT_DATA']['y_test'])
     train_dataset = TwitterDataset(x_train, y_train)
     test_dataset = TwitterDataset(x_test, y_test)
