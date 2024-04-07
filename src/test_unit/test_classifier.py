@@ -17,20 +17,16 @@ class TestClassifier(unittest.TestCase):
         self.model = Classifier(self.input_size, self.hidden_size, self.dropout_rate1, self.output_size)
 
     def test_forward(self):
-        # Test the forward pass
         x = torch.randn(32, self.input_size)
         output = self.model(x)
         self.assertEqual(output.shape, torch.Size([32, self.output_size]))
 
     def test_get_classifier(self):
-        # Test the get_classifier function
         config = {'CLASSIFIER_HYPERPARAMETERS': {'input_size': '100', 'hidden_size': '64', 'dropout_rate1': '0.5', 'output_size': '1'}}
         model = get_classifier(config)
         self.assertTrue(isinstance(model, Classifier))
 
     def test_train_model(self):
-        # Dummy data
-        # X_train_sparse = sp.csr_matrix(X_train)
         X_train = sp.csr_matrix(torch.randn(100, self.input_size))
         y_train = torch.randint(0, 2, (100,))
         X_test = sp.csr_matrix(torch.randn(20, self.input_size))
