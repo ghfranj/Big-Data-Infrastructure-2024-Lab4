@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  app:
+    image: ghfranjabour/lab1_big_data_infrastructure:latest
+    container_name: lab1_container
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data

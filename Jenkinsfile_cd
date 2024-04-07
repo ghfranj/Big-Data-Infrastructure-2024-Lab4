@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+
+    environment {
+        dockerImage = 'ghfranjabour/lab1_big_data_infrastructure:latest'
+        dockerhubCredentialsId = 'docker_cred'
+    }
+
+    stages {
+        stage('Deploy') {
+            steps {
+                script {
+                    docker.withRegistry('', dockerhubCredentialsId) {
+                        dockerImage.pull()
+                        dockerImage.run()
+                    }
+                }
+            }
+        }
+        stage('Functional Testing') {
+            steps {
+                sh 'python3 src/test_unit/test_process_data.py'
+                sh 'python3 src/test_unit/test_classifier.py'
+            }
+        }
+    }
+}

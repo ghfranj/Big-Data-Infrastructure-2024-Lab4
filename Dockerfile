@@ -1,15 +1,14 @@
-FROM python:latest
+# Specify the base image
+FROM python:3.9-slim
 
-# Set working directory
+# Set the working directory
 WORKDIR /app
 
-ENV PYTHONUNBUFFERED 1
-
-# Copy project files
-COPY . /app
+# Copy the source code to the working directory
+COPY . .
 
 # Install dependencies
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Set command to run when the container starts
-CMD ["python", "main.py"]
+# Define the command to run the application
+CMD ["python3", "main.py"]

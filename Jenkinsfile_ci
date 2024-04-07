@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    environment {
+        registry = "ghfranjabour/lab1_big_data_infrastructure"
+        dockerImage = 'lab1_image'
+        dockerhub_credentials_id = 'docker_cred'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab1.git'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build registry + ":$BUILD_NUMBER"
+                }
+            }
+        }
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('', dockerhub_credentials_id) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+    }
+}
