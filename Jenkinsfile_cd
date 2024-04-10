@@ -24,31 +24,6 @@ pipeline {
                 }
             }
         }
-        stage('Installing pandas') {
-            steps {
-                script {
-                    def workspaceDir = env.WORKSPACE
-                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install pandas")
-                }
-            }
-        }
-        stage('Installing numpy') {
-            steps {
-                script {
-                    def workspaceDir = env.WORKSPACE
-                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install numpy")
-                }
-            }
-        }
-
-        stage('Installing torch') {
-            steps {
-                script {
-                    def workspaceDir = env.WORKSPACE
-                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install torch==2.2.2")
-                }
-            }
-        }
         stage('Functional testing') {
             steps {
                 script {
