@@ -5,22 +5,73 @@ pipeline {
         dockerImage = 'ghfranjabour/lab1_big_data_infrastructure:latest'
         dockerhubCredentialsId = 'docker_cred'
     }
-
+    options {
+        timestamps()
+        skipDefaultCheckout(true)
+	}
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab1.git'
+            }
+        }
         stage('Deploy') {
             steps {
                 script {
-                    docker.withRegistry('', dockerhubCredentialsId) {
-                        dockerImage.pull()
-                        dockerImage.run()
+                    docker.withRegistry('https://registry.hub.docker.com', dockerhubCredentialsId) {
+                        docker.image(dockerImage).pull()
                     }
                 }
             }
         }
-        stage('Functional Testing') {
+        // stage('Installing coverage') {
+        //     steps {
+        //         script {
+        //             def workspaceDir = env.WORKSPACE
+        //             docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install coverage")
+        //         }
+        //     }
+        // }
+        // stage('Installing dvc') {
+        //     steps {
+        //         script {
+        //             def workspaceDir = env.WORKSPACE
+        //             docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install dvc")
+        //         }
+        //     }
+        // }
+
+        stage('Installing pandas') {
             steps {
-                sh 'python3 src/test_unit/test_process_data.py'
-                sh 'python3 src/test_unit/test_classifier.py'
+                script {
+                    def workspaceDir = env.WORKSPACE
+                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install pandas")
+                }
+            }
+        }
+        stage('Installing numpy') {
+            steps {
+                script {
+                    def workspaceDir = env.WORKSPACE
+                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install numpy")
+                }
+            }
+        }
+
+        stage('Installing torch') {
+            steps {
+                script {
+                    def workspaceDir = env.WORKSPACE
+                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src","python -m pip install torch==2.2.2")
+                }
+            }
+        }
+        stage('Functional testing') {
+            steps {
+                script {
+                    def workspaceDir = env.WORKSPACE
+                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src"," python -m unittest src.test_unit.test_process_data && python -m unittest src.test_unit.test_classifier")
+                }
             }
         }
     }
