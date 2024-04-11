@@ -3,32 +3,42 @@ pipeline {
 
     environment {
         dockerImage = 'ghfranjabour/lab1_big_data_infrastructure:latest'
-        dockerhubCredentialsId = 'docker_cred'
+        containerName = 'lab1_c'
     }
-    options {
-        timestamps()
-        skipDefaultCheckout(true)
-	}
+
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab1.git'
-            }
-        }
-        stage('Deploy') {
+        stage('Pull Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', dockerhubCredentialsId) {
-                        docker.image(dockerImage).pull()
-                    }
+                    println("${pwd()}")
+                    bat "docker pull ${dockerImage}"
                 }
             }
         }
-        stage('Functional testing') {
+
+        stage('Launch Docker Container') {
             steps {
                 script {
-                    def workspaceDir = env.WORKSPACE
-                    docker.image(dockerImage).run("--rm -v ${workspaceDir}/src:/app/src"," python -m unittest src.test_unit.test_process_data && python -m unittest src.test_unit.test_classifier")
+                    // Launch the Docker container
+                    bat "docker run -d -it --name ${containerName} ${dockerImage}"
+                }
+            }
+        }
+
+        stage('Install requirements') {
+            steps {
+                script {
+                    // Launch the Docker container
+                    bat "docker exec ${containerName} python -m pip install -r requirements.txt"
+                }
+            }
+        }
+        stage('Run Test Script') {
+            steps {
+                script {
+                    // Execute the Python test script inside the container
+                    bat "docker exec ${containerName} python -m unittest src/test_unit/test_process_data.py"
+                    bat "docker exec ${containerName} python -m unittest src/test_unit/test_classifier.py"
                 }
             }
         }
