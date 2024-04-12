@@ -4,7 +4,5 @@ services:
   app:
     image: ghfranjabour/lab1_big_data_infrastructure:latest
     container_name: lab1_c_
-    ports:
-      - "8080:8080"
     volumes:
       - ./data:/app/data
