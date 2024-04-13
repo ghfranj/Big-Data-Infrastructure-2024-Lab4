@@ -4,6 +4,7 @@ services:
   app:
     image: ghfranjabour/lab1_big_data_infrastructure:latest
     container_name: lab1_c_1
-    dockerfile: Dockerfile
+    build:
+      dockerfile: Dockerfile
     volumes:
       - ./data:/app/data
