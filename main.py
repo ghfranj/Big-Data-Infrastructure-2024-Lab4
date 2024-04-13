@@ -7,9 +7,6 @@ import torch
 
 
 if __name__ == '__main__':
-
-    for package, version in packages.items():
-        print(f"{package}: {version}")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f'Working on {device}')
 
