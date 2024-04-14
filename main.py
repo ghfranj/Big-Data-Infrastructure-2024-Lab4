@@ -1,7 +1,6 @@
 import configparser
-
-from src import process_data
-from src.Classifier import train_model, get_classifier
+from src.utils import process_data_tools
+from src.utils.Classifier_utils import train_model, get_classifier
 import torch.nn as nn
 import torch
 
@@ -13,8 +12,8 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read("config.ini")
 
-    process_data.preprocess_data()
-    train_loader, test_loader, max_features = process_data.build_loaders(int(config['CLASSIFIER_HYPERPARAMETERS']['batch_size']))
+    process_data_tools.preprocess_data()
+    train_loader, test_loader, max_features = process_data_tools.build_loaders(int(config['CLASSIFIER_HYPERPARAMETERS']['batch_size']))
     print('loaders built successfully')
 
     config['CLASSIFIER_HYPERPARAMETERS']['input_size'] = str(max_features)

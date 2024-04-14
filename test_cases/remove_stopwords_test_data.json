@@ -1,0 +1,10 @@
+{
+    "sentences": [
+        "Hello, how are you?",
+        "I'm fine and you?"
+    ],
+    "expected_output": [
+        "Hello, you?",
+        "I'm fine you?"
+    ]
+}

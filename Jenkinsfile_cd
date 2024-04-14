@@ -2,43 +2,34 @@ pipeline {
     agent any
 
     environment {
-        dockerImage = 'ghfranjabour/lab1_big_data_infrastructure:latest'
-        containerName = 'lab1_c'
+        dockerImage = 'ghfranjabour/lab1_big_data_infrastructure:v2.0'
+        containerName = 'lab1_ci'
     }
 
     stages {
         stage('Pull Docker Image') {
             steps {
                 script {
-                    println("${pwd()}")
+                    withCredentials([usernamePassword(credentialsId: 'docker_cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"
+                    }
                     bat "docker pull ${dockerImage}"
                 }
             }
         }
-
         stage('Launch Docker Container') {
             steps {
                 script {
-                    // Launch the Docker container
-                    bat "docker run -d -it --name ${containerName} ${dockerImage}"
+                    def startContainerOutput = bat(returnStdout: true, script: "docker run -d --name ${containerName} -p 80:5556 ${dockerImage}")
+                    echo "Start Container Output: ${startContainerOutput}"
                 }
             }
         }
-
-        stage('Install requirements') {
+        stage('Test') {
             steps {
                 script {
-                    // Launch the Docker container
-                    bat "docker exec ${containerName} python -m pip install -r requirements.txt"
-                }
-            }
-        }
-        stage('Run Test Script') {
-            steps {
-                script {
-                    // Execute the Python test script inside the container
-                    bat "docker exec ${containerName} python -m unittest src/test_unit/test_process_data.py"
-                    bat "docker exec ${containerName} python -m unittest src/test_unit/test_classifier.py"
+                    bat "docker exec ${containerName} python -m unittest test_process_data"
+                    bat "docker exec ${containerName} python -m unittest test_classifier"
                 }
             }
         }

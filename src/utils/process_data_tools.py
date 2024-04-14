@@ -4,8 +4,9 @@ import nltk
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
-from torch.utils.data import Dataset, DataLoader
-import torch
+from torch.utils.data import DataLoader
+from src.classes.TwitterDataset import TwitterDataset
+
 
 def load_data(file_path):
     data = pd.read_csv(file_path, encoding='latin1')[:30000]
@@ -62,25 +63,6 @@ def preprocess_data():
     y_train_df.to_csv(config['SPLIT_DATA']['y_train'], index=False)
     y_test_df.to_csv(config['SPLIT_DATA']['y_test'], index=False)
     print("Built split files successfully")
-
-
-class TwitterDataset(Dataset):
-    def __init__(self, x_data, y_data):
-        inputs = x_data
-        outputs = y_data
-        self.inputs = list(inputs)
-        self.outputs = list(outputs)
-
-    def __len__(self):
-        return len(self.outputs)
-
-    def __getitem__(self, idx):
-        inputs = self.inputs[idx].toarray()
-        outputs = self.outputs[idx]
-        return {
-            'input': torch.tensor(inputs).float(),
-            'output': torch.tensor(outputs).float()
-        }
 
 
 def get_train_test_data(x_train_path, y_train_path, x_test_path, y_test_path):

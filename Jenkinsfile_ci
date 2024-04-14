@@ -2,33 +2,70 @@ pipeline {
     agent any
 
     environment {
-        dockerImage = "ghfranjabour/lab1_big_data_infrastructure:latest"
-        image_name = "lab1_image"
-        dockerhub_credentials_id = 'docker_cred'
+        DOCKERHUB_CREDS=credentials('docker_cred')
+        LC_ALL = "en_US.UTF-8"
+        LANG    = "en_US.UTF-8"
+        LANGUAGE = "en_US.UTF-8"
     }
 
+options {
+        timestamps()
+        skipDefaultCheckout(true)
+	}
     stages {
-        stage('Checkout') {
+        stage('Clone github repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab1.git'
-            }
-        }
-        stage('Build Docker Image') {
+                cleanWs()
+                bat 'chcp 65001 && git clone -b main https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab1.git'
+				}
+			}
+
+        stage('Checkout repo dir') {
             steps {
-                script {
-                    docker.build image_name + ":$BUILD_NUMBER"
+                bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab1 && dir'
+				}
+			}
+
+        stage('Login'){
+            steps{
+                //withCredentials([usernamePassword(credentialsId: 'mle-template', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]){
+                //bat 'chcp 65001 && echo %DOCKER_REGISTRY_PWD% | docker login -u %DOCKER_REGISTRY_USER% --password-stdin'}
+                //bat 'chcp 65001 && echo %DOCKERHUB_CREDS_PSW% | docker login -u %DOCKERHUB_CREDS_USR% --password-stdin'
+                bat 'chcp 65001 && docker login -u %DOCKERHUB_CREDS_USR% -p %DOCKERHUB_CREDS_PSW%'
+                // bat 'docker stop lab1_c_'
                 }
             }
-        }
-        stage('Push Docker Image to Docker Hub') {
+
+        stage('Create and run docker container') {
             steps {
                 script {
-                    def customImage = docker.image(dockerImage)
-                    docker.withRegistry('', dockerhub_credentials_id) {
-                        customImage.push()
-                    }
+                    try {
+                        bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab1 && docker-compose build'
+                        }
+
+                    finally {
+                    bat '''
+                        chcp 65001
+                        cd Big-Data-Infrastructure-2024-Lab1
+                        docker-compose up -d
+                        '''
+                        }
+				    }
                 }
             }
+
+        stage('Push') {
+            steps {
+                bat 'chcp 65001 && docker tag ghfranjabour/lab1_big_data_infrastructure ghfranjabour/lab1_big_data_infrastructure:v2.0'
+                bat 'chcp 65001 && docker push ghfranjabour/lab1_big_data_infrastructure:v2.0'
+            }
+        }
+
+	}
+
+    post {
+        always {
+            bat 'chcp 65001 && docker logout'
         }
     }
 }
