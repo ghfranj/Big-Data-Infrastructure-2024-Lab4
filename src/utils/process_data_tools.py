@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from src.classes.TwitterDataset import TwitterDataset
-
+from src.classes.Database import Database
 
 def load_data(file_path):
     data = pd.read_csv(file_path, encoding='latin1')[:30000]
@@ -16,14 +16,15 @@ def load_data(file_path):
 
 def clean_text(text):
     cleaned_text = ''.join([char.lower() for char in text if char.isalnum() or char.isspace()])
-    import nltk
-    nltk.download('punkt')
+    if not nltk.download('punkt', quiet=True):
+        print("Punkt tokenizer already downloaded")
     tokens = nltk.word_tokenize(cleaned_text)
     return ' '.join(tokens)
 
 
 def remove_stopwords(text):
-    nltk.download('stopwords')
+    if not nltk.download('stopwords', quiet=True):
+        print("Stopwords already downloaded")
     stop_words = set(stopwords.words('english'))
     return ' '.join([word for word in text.split() if word not in stop_words])
 
@@ -34,59 +35,70 @@ def vectorize(data):
     return x
 
 
-def preprocess_data():
+def preprocess_data(db):
     config = configparser.ConfigParser()
     config.read("config.ini")
+
+    # Load and preprocess the data
     data = load_data(config["DATA"]["main_data_file"])
-    print("cleaning texts ...")
     data['cleaned_text'] = data['SentimentText'].apply(clean_text)
-    print("removing stopwords ...")
     data['cleaned_text'] = data['cleaned_text'].apply(remove_stopwords)
 
-    x = data['cleaned_text']
-    y = data['Sentiment']
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+    # Split data into train and test sets
+    train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
-    # Convert X_train and X_test to DataFrames with appropriate column names
-    x_train_df = pd.DataFrame(data=x_train, columns=['cleaned_text'])
-    x_test_df = pd.DataFrame(data=x_test, columns=['cleaned_text'])
+    # Insert training data into the database
+    for _, row in train_data.iterrows():
+        text = row['cleaned_text']
+        sentiment = row['Sentiment']
+        db.insert_training_data(text, sentiment)
 
-    # Save X_train and X_test to CSV files
-    x_train_df.to_csv(config['SPLIT_DATA']['x_train'])
-    x_test_df.to_csv(config['SPLIT_DATA']['x_test'])
+    print("train data storing in database completed successfully")
+    # Insert test data into the database
+    for _, row in test_data.iterrows():
+        text = row['cleaned_text']
+        sentiment = row['Sentiment']
+        db.insert_testing_data(text, sentiment)
+    print("test data storing in database completed successfully")
 
-    # Convert y_train and y_test to DataFrames with appropriate column names
-    y_train_df = pd.DataFrame(data=list(y_train), columns=['Sentiment'])
-    y_test_df = pd.DataFrame(data=list(y_test), columns=['Sentiment'])
-
-    # Save y_train and y_test to CSV files
-    y_train_df.to_csv(config['SPLIT_DATA']['y_train'], index=False)
-    y_test_df.to_csv(config['SPLIT_DATA']['y_test'], index=False)
-    print("Built split files successfully")
+    print("Data preprocessing and storage completed successfully")
 
 
-def get_train_test_data(x_train_path, y_train_path, x_test_path, y_test_path):
-    inputs = list(pd.read_csv(x_train_path)['cleaned_text']) + list(pd.read_csv(x_test_path)['cleaned_text'])
-    outputs = list(pd.read_csv(y_train_path)['Sentiment']) + list(pd.read_csv(y_test_path)['Sentiment'])
-    inputs = pd.DataFrame(data=inputs, columns=['cleaned_text'])
-    outputs = pd.DataFrame(data=outputs, columns=['Sentiment'])
-    data = pd.concat([inputs, outputs], axis=1)
-    data.dropna(inplace=True)
-    inputs = data['cleaned_text']
-    outputs = data['Sentiment']
+
+def get_train_test_data(db):
+    # Get training data from the database
+    train_data = db.get_training_data()
+    # Get testing data from the database
+    test_data = db.get_testing_data()
+    # print('train_data is:', train_data)
+    # Concatenate training and testing data
+    data = train_data + test_data
+    df = pd.DataFrame(data, columns=['id', 'cleaned_text', 'Sentiment'])
+
+    # Drop rows with missing values
+    df.dropna(inplace=True)
+
+    # Split data into inputs and outputs
+    inputs = df['cleaned_text']
+    outputs = df['Sentiment']
+
+    # Vectorize inputs
     vectorized_data = list(vectorize(inputs))
-    x_train = vectorized_data[:int(0.2*len(outputs))]
-    x_test = vectorized_data[int(0.2*len(outputs)):]
-    y_train = outputs[:int(0.2*len(outputs))]
-    y_test = outputs[int(0.2*len(outputs)):]
+
+    # Split data into training and testing sets
+    split_index = int(0.2 * len(outputs))
+    x_train = vectorized_data[:split_index]
+    x_test = vectorized_data[split_index:]
+    y_train = outputs[:split_index]
+    y_test = outputs[split_index:]
+
     return x_train, y_train, x_test, y_test
 
 
-def build_loaders(batch_size=64):
+def build_loaders(db, batch_size=64):
     config = configparser.ConfigParser()
     config.read("config.ini")
-    x_train, y_train, x_test, y_test = get_train_test_data(config['SPLIT_DATA']['x_train'], config['SPLIT_DATA']['y_train'],\
-                                                      config['SPLIT_DATA']['x_test'], config['SPLIT_DATA']['y_test'])
+    x_train, y_train, x_test, y_test = get_train_test_data(db)
     train_dataset = TwitterDataset(x_train, y_train)
     test_dataset = TwitterDataset(x_test, y_test)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)

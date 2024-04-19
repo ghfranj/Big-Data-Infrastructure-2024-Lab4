@@ -1,10 +1,44 @@
 version: '3.8'
 
+
 services:
+  postgres:
+    container_name: lab2_db
+    image: postgres:12.3-alpine
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+      PGADMIN_PORT: ${DB_PORT}
+    volumes:
+      - ./data:/var/lib/postgresql/db
+
+#  pgadmin:
+#    depends_on:
+#      - postgres
+#    image: dpage/pgadmin4:4.23
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: ${DB_USER}
+#      PGADMIN_DEFAULT_PASSWORD: ${DB_PASSWORD}
+#      PGADMIN_LISTEN_PORT: 80
+#    ports:
+#      - 15432:80
+
   app:
+    depends_on:
+      - postgres
     image: ghfranjabour/lab1_big_data_infrastructure:latest
-    container_name: lab1_c_1
+    container_name: lab2_c
+#    restart: always
     build:
-      dockerfile: Dockerfile
+      context: .
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_USER: ${DB_USER}
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
     volumes:
       - ./data:/app/data
+    command: ["python3", "main.py"]

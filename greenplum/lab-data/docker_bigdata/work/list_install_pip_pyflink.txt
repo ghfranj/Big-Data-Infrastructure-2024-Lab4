@@ -1,0 +1,2 @@
+% from: https://github.com/apache/flink/blob/master/flink-python/setup.py
+pemja pandas pyarrow apache-beam cloudpickle avro-python3 requests apache-flink

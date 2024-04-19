@@ -1,12 +1,17 @@
 FROM python:3.9
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-client
+
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the source code to the working directory
-COPY . .
-
-# Install dependencies
+# Copy the requirements file and install dependencies
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# Run the application
+# Copy the source code into the container
+COPY . .
+
 CMD ["python3", "main.py"]
