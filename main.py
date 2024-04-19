@@ -12,6 +12,8 @@ if __name__ == '__main__':
     config.read("config.ini")
 
     db = Database()  # Create an instance of the Database class
+    # process_data_tools.preprocess_data(db)
+
     if db.get_table_counts() < 25000:
         process_data_tools.preprocess_data(db)
     else:

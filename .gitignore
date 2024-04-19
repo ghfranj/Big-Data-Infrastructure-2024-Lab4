@@ -1,6 +1,5 @@
 /venv
-/data
-/models
 .env
 D
-/data2
+/models
+/data2/train.csv
