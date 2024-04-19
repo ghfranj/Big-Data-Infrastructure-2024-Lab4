@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        dockerImage = 'ghfranjabour/lab1_big_data_infrastructure:v2.0'
-        containerName = 'lab1_ci'
+        dockerImage = 'ghfranjabour/lab2_big_data_infrastructure:v2.0'
+        containerName = 'lab2_cd'
     }
 
     stages {
