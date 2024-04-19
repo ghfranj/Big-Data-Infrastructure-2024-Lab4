@@ -2,4 +2,4 @@ outs:
 - md5: c19f068aed460aae823149c708c7ed30.dir
   size: 8664015
   nfiles: 1
-  path: data2
+  path: https://drive.google.com/drive/folders/16bJnBbTNWQNFyqHeZ8XN4Iymv2Yoj0k5?usp=drive_link
