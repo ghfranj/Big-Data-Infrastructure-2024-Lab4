@@ -48,17 +48,21 @@ def preprocess_data(db):
     train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
     # Insert training data into the database
-    for _, row in train_data.iterrows():
-        text = row['cleaned_text']
-        sentiment = row['Sentiment']
-        db.insert_training_data(text, sentiment)
-
+    # for _, row in train_data.iterrows():
+    #     text = row['cleaned_text']
+    #     sentiment = row['Sentiment']
+    #     db.insert_training_data(text, sentiment)
+    data = [(row['cleaned_text'], row['Sentiment']) for _, row in train_data.iterrows()]
+    data_ids = db.insert_training_data_bulk(data)
     print("train data storing in database completed successfully")
     # Insert test data into the database
-    for _, row in test_data.iterrows():
-        text = row['cleaned_text']
-        sentiment = row['Sentiment']
-        db.insert_testing_data(text, sentiment)
+    # for _, row in test_data.iterrows():
+    #     text = row['cleaned_text']
+    #     sentiment = row['Sentiment']
+    #     db.insert_testing_data(text, sentiment)
+
+    data = [(row['cleaned_text'], row['Sentiment']) for _, row in test_data.iterrows()]
+    data_ids = db.insert_testing_data_bulk(data)
     print("test data storing in database completed successfully")
 
     print("Data preprocessing and storage completed successfully")

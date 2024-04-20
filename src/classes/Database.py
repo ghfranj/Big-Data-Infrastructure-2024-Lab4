@@ -49,6 +49,16 @@ class Database:
         self.cur.execute(query)
         self.conn.commit()
 
+    def insert_training_data_bulk(self, data):
+        query = """
+        INSERT INTO train_data (text, sentiment)
+        VALUES (%s, %s)
+        RETURNING id;
+        """
+        self.cur.executemany(query, data)
+        # data_ids = [row[0] for row in self.cur.fetchall()]
+        self.conn.commit()
+        # return data_ids
     def insert_training_data(self, text, sentiment):
         query = """
         INSERT INTO train_data (text, sentiment)
@@ -59,7 +69,16 @@ class Database:
         data_id = self.cur.fetchone()[0]
         self.conn.commit()
         return data_id
-
+    def insert_testing_data_bulk(self, data):
+        query = """
+        INSERT INTO test_data (text, sentiment)
+        VALUES (%s, %s)
+        RETURNING id;
+        """
+        self.cur.executemany(query, data)
+        # data_ids = [row[0] for row in self.cur.fetchall()]
+        self.conn.commit()
+        # return data_ids
     def insert_testing_data(self, text, sentiment):
         query = """
         INSERT INTO test_data (text, sentiment)
