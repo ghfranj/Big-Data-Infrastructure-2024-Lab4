@@ -9,8 +9,9 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy initialization script into the container
+
 COPY db/01-init.sh /docker-entrypoint-initdb.d/01-init.sh
 
 # Set permissions for the initialization script
-RUN chmod +x /docker-entrypoint-initdb.d/01-init.sh
+#RUN chmod +x /docker-entrypoint-initdb.d/01-init.sh
 

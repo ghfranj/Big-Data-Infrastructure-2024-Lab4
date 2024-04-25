@@ -30,7 +30,6 @@ services:
   vault:
     image: hashicorp/vault:latest
     container_name: vault_c
-    restart: always
     networks:
       - my_network
     ports:
