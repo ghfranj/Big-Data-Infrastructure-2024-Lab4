@@ -1,21 +1,21 @@
 import numpy as np
 import psycopg2
 from hvac import Client
+import os
 
 
 class Database:
     def __init__(self):
-        print("i'm here )))))")
-        vault_client = Client(url="http://vault:8200", token="myroot")
+        vault_url = os.getenv('VAULT_URL')
+        vault_token = os.getenv('VAULT_TOKEN')
+        vault_path = os.getenv('VAULT_PATH')
+        print("connection information", vault_url, vault_token, vault_path)
+        vault_client = Client(url=vault_url, token=vault_token)
         if vault_client.is_authenticated():
             print("Connected to Vault successfully.")
         else:
             print("Failed to connect to Vault.")
-        print("i'm here2 )))))")
-        # vault_client.token = "myroot"
-        print("i'm here33 )))))")
-        database_secrets = vault_client.read("secret/data/database")['data']['data']
-        print("i'm here3 )))))")
+        database_secrets = vault_client.read(vault_path)['data']['data']
         print('got ', database_secrets)
         self.conn = psycopg2.connect(
             host= database_secrets["DB_HOST"],

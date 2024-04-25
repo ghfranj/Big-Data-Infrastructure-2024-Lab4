@@ -19,12 +19,13 @@ services:
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
+      - VAULT_URL=http://vault:8200
+      - VAULT_TOKEN=myroot
+      - VAULT_PATH=secret/data/database
     volumes:
       - ./db:/docker-entrypoint-initdb.d/
     ports:
       - 5432:5432
-#    command: ["sh", "-c", "echo 'POSTGRES_USER=$POSTGRES_USER' && echo 'POSTGRES_PASSWORD=$POSTGRES_PASSWORD' && echo 'POSTGRES_DB=$POSTGRES_DB'"]
-
 
   vault:
     image: hashicorp/vault:latest
@@ -32,16 +33,13 @@ services:
     networks:
       - my_network
     ports:
-      - "8200:8200"  # Expose Vault's default port
+      - "8200:8200"
     environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "myroot"
+      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN}
       VAULT_ADDR: "http://0.0.0.0:8200"
       VAULT_API_ADDR: "http://0.0.0.0:8200"
-      VAULT_LOG_LEVEL: "info"  # Set the log level to info for better logging
+      VAULT_LOG_LEVEL: "info"
       VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-      VAULT_STORAGE: "consul"  # Use Consul as the storage backend
-      VAULT_CONSUL_ADDRESS: "consul:8500"  # Address of Consul
-      VAULT_CONSUL_TOKEN: "myroot"  # Consul token for authentication
     volumes:
       - ./vault-config:/vault/config
 
@@ -51,6 +49,10 @@ services:
     container_name: lab3
     build:
       dockerfile: Dockerfile
+    environment:
+      VAULT_URL: ${VAULT_URL}
+      VAULT_TOKEN: ${VAULT_TOKEN}
+      VAULT_PATH: ${VAULT_PATH}
     volumes:
       - ./data:/app/data
 
