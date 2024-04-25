@@ -16,13 +16,13 @@ options {
         stage('Clone github repository') {
             steps {
                 cleanWs()
-                bat 'chcp 65001 && git clone -b main https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab2.git'
+                bat 'chcp 65001 && git clone -b main https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab3.git'
 				}
 			}
 
         stage('Checkout repo dir') {
             steps {
-                bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab2 && dir'
+                bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab3 && dir'
 				}
 			}
 
@@ -36,24 +36,50 @@ options {
             steps {
                 script {
                     try {
-                        bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab2 && docker-compose build'
+                        bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab3 && docker-compose build'
                         }
 
                     finally {
                     bat '''
                         chcp 65001
-                        cd Big-Data-Infrastructure-2024-Lab2
-                        docker-compose up
+                        cd Big-Data-Infrastructure-2024-Lab3
+                        docker-compose up -d vault
+                        '''
+                    def logs = bat(returnStdout: true, script: 'docker logs vault_c').trim()
+                    while(!logs.contains("Development mode should NOT be used in production installations!"))
+                    {
+                        sleep time: 10, unit: 'SECONDS'
+                        logs = bat(returnStdout: true, script: 'docker logs vault_c').trim()
+                    }
+                    bat '''
+                        chcp 65001
+                        cd Big-Data-Infrastructure-2024-Lab3
+                        docker logs vault_c
+                        docker exec  vault_c vault login myroot
+                        docker exec  vault_c vault kv put secret/database DB_HOST="postgres" DB_NAME="lab3" DB_PASSWORD="ghfranjabour321" DB_PORT="5432" DB_USER="ghfranjabour"
+                        docker exec  vault_c vault kv get secret/database
+                        docker compose up -d postgres
+                        '''
+                    def logs2 = bat(returnStdout: true, script: 'docker logs postgres').trim()
+                    while(!logs2.contains("COMMIT"))
+                    {
+                        sleep time: 10, unit: 'SECONDS'
+                        logs2 = bat(returnStdout: true, script: 'docker logs postgres').trim()
+                    }
+                    bat '''
+                        chcp 65001
+                        cd Big-Data-Infrastructure-2024-Lab3
+                        docker logs postgres
+                        docker compose up app
                         '''
                         }
 				    }
                 }
             }
-
         stage('Push') {
             steps {
-                bat 'chcp 65001 && docker tag ghfranjabour/lab2_big_data_infrastructure ghfranjabour/lab2_big_data_infrastructure:v2.0'
-                bat 'chcp 65001 && docker push ghfranjabour/lab2_big_data_infrastructure:v2.0'
+                bat 'chcp 65001 && docker tag ghfranjabour/lab3_big_data_infrastructure ghfranjabour/lab3_big_data_infrastructure:v2.0'
+                bat 'chcp 65001 && docker push ghfranjabour/lab3_big_data_infrastructure:v2.0'
             }
         }
 
