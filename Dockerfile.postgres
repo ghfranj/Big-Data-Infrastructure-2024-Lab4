@@ -3,6 +3,6 @@ FROM postgres:latest
 # Install necessary packages to interact with HashiCorp Vault
 RUN apt-get update && apt-get install -y \
     jq \
-    curl \
+    docker \
  && rm -rf /var/lib/apt/lists/*
 
