@@ -74,8 +74,8 @@ options {
             }
         stage('Push') {
             steps {
-                bat 'chcp 65001 && docker tag ghfranjabour/lab3_big_data_infrastructure ghfranjabour/lab3_big_data_infrastructure:v2.0'
-                bat 'chcp 65001 && docker push ghfranjabour/lab3_big_data_infrastructure:v2.0'
+                bat 'chcp 65001 && docker tag ghfranjabour/lab3_big_data_infrastructure ghfranjabour/lab3_big_data_infrastructure:latest'
+                bat 'chcp 65001 && docker push ghfranjabour/lab3_big_data_infrastructure:latest'
             }
         }
 
