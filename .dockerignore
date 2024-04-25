@@ -1,0 +1,13 @@
+# Exclude version control system directories
+.git
+.gitignore
+
+# Exclude temporary files
+*.pyc
+*.swp
+
+# Exclude node_modules directory (for Node.js projects)
+node_modules
+
+# Exclude virtual environment directories (for Python projects)
+venv

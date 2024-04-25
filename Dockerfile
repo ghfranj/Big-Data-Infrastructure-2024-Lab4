@@ -1,8 +1,7 @@
-FROM python:3.9
+FROM ghfranjabour/lab2_big_data_infrastructure:v2.0
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
-    postgresql-client
+RUN apt-get update && apt-get install -y  postgresql-client
 
 # Set the working directory in the container
 WORKDIR /app
@@ -15,6 +14,3 @@ RUN pip install -r requirements.txt
 COPY . .
 
 CMD ["python3", "main.py"]
-
-
-
