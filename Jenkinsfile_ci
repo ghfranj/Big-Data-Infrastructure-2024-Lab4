@@ -3,11 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDS=credentials('docker_cred')
-        LC_ALL = "en_US.UTF-8"
-        LANG    = "en_US.UTF-8"
-        LANGUAGE = "en_US.UTF-8"
     }
-
 options {
         timestamps()
         skipDefaultCheckout(true)
@@ -19,7 +15,6 @@ options {
                 bat 'chcp 65001 && git clone -b main https://github.com/ghfranj/Big-Data-Infrastructure-2024-Lab3.git'
 				}
 			}
-
         stage('Checkout repo dir') {
             steps {
                 bat 'chcp 65001 && cd Big-Data-Infrastructure-2024-Lab3 && dir'
@@ -46,6 +41,7 @@ options {
                         docker-compose up -d vault
                         '''
                     def logs = bat(returnStdout: true, script: 'docker logs vault_c').trim()
+
                     while(!logs.contains("Development mode should NOT be used in production installations!"))
                     {
                         sleep time: 10, unit: 'SECONDS'
