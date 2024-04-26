@@ -33,4 +33,6 @@ if __name__ == '__main__':
     # # model.load_state_dict(torch.load(config['MODEL']['classifier']))
     # # print('Model stored successfully')
 
-    db.close_connection()  # Close the database connection
+    db.close_connection()
+    print("connection with database closed")
+    # Close the database connection
