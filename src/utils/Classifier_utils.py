@@ -17,6 +17,7 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, epochs =
     print("\nTraining the model...\n")
     model.train()
     model.to(device)
+    accuracy = 0
     for epoch in range(epochs):
         epoch_loss = 0
         model.train()
@@ -48,3 +49,5 @@ def train_model(model, train_loader, test_loader, optimizer, criterion, epochs =
         accuracy = correct / total
         print("\nAccuracy:", accuracy)
         print(' ')
+    return accuracy
+

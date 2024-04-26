@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        dockerImage = 'ghfranjabour/lab3_big_data_infrastructure:latest'
+        dockerImage = 'ghfranjabour/lab4_big_data_infrastructure:v4.0'
         containerName = 'lab4_cd'
     }
 
