@@ -9,6 +9,8 @@ services:
       - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - my_network
 
   kafka:
     image: wurstmeister/kafka:latest
@@ -20,7 +22,8 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "test:1:1"
+    networks:
+      - my_network
 
   postgres:
     image: ghfranjabour/postgres_vault
