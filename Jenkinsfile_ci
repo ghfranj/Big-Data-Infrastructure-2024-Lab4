@@ -38,7 +38,7 @@ options {
                     bat '''
                         chcp 65001
                         cd Big-Data-Infrastructure-2024-Lab4
-                        docker-compose up -d vault kafka
+                        docker-compose up -d vault zookeeper kafka
                         '''
                     def logs = bat(returnStdout: true, script: 'docker logs vault_c').trim()
 
