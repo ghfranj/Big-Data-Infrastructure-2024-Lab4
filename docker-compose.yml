@@ -4,7 +4,7 @@ networks:
 
 services:
   postgres:
-    image: postgres:13.1
+    image: ghfranjabour/postgres_vault
     container_name: postgres
     build:
       dockerfile: Dockerfile.postgres
@@ -47,6 +47,7 @@ services:
       - ./vault-config:/vault/config
 
   app:
+    image: ghfranjabour/lab3_big_data_infrastructure
     networks:
       - my_network
     container_name: lab3
